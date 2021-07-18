@@ -60,17 +60,80 @@ static int parse_audio(tgbl_audio_t *audio, char *json, jsmntok_t *et)
         if (jsoneq(str, &t[i], "file_id") == 0)
         {
             strncpy(audio->file_id, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
-            printf("- ID: %s\n", audio->file_id);
+            printf("    - ID: %s\n", audio->file_id);
             i++;
         }else if (jsoneq(str, &t[i], "mime_type") == 0)
         {
             strncpy(audio->mime_type, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
-            printf("- MIME type: %s\n", audio->mime_type);
+            printf("    - MIME type: %s\n", audio->mime_type);
             i++;
         }else if (jsoneq(str, &t[i], "title") == 0)
         {
             strncpy(audio->title, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
-            printf("- Title: %s\n", audio->title);
+            printf("    - Title: %s\n", audio->title);
+            i++;
+        }
+    }
+
+    return r;
+}
+
+static int parse_user (tgbl_user_t *user, char *json, jsmntok_t *et)
+{
+    jsmntok_t *t;
+    char *str = json + et->start;
+    int r = parse(str, et->end - et->start, &t);
+
+    for (int i = 1; i < r; i++)
+    {
+        jsmntok_t *ct = &t[i];
+        char *debug = str + ct->start;
+        if (jsoneq(str, &t[i], "id") == 0)
+        {
+            char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
+            strncpy(id_str, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            user->id = atoi(id_str);
+            free (id_str);
+            printf("    - ID: %d\n", user->id);
+            i++;
+        }else if (jsoneq(str, &t[i], "username") == 0)
+        {
+            strncpy(user->username, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("    - Username: %s\n", user->username);
+            i++;
+        }else if (jsoneq(str, &t[i], "first_name") == 0)
+        {
+            strncpy(user->first_name, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("    - First name: %s\n", user->first_name);
+            i++;
+        }
+    }
+
+    return r;
+}
+
+static int parse_chat (tgbl_chat_t *chat, char *json, jsmntok_t *et)
+{
+    jsmntok_t *t;
+    char *str = json + et->start;
+    int r = parse(str, et->end - et->start, &t);
+
+    for (int i = 1; i < r; i++)
+    {
+        jsmntok_t *ct = &t[i];
+        char *debug = str + ct->start;
+        if (jsoneq(str, &t[i], "id") == 0)
+        {
+            char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
+            strncpy(id_str, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            chat->id = atoi(id_str);
+            free (id_str);
+            printf("    - ID: %d\n", chat->id);
+            i++;
+        }else if (jsoneq(str, &t[i], "type") == 0)
+        {
+            strncpy(chat->type, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("    - MIME type: %s\n", chat->type);
             i++;
         }
     }
@@ -94,19 +157,29 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
             strncpy(id_str, mess_str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
             message->id = atoi(id_str);
             free (id_str);
-            printf("- ID: %d\n", message->id);
+            printf("  - ID: %d\n", message->id);
             i++;
         }else if (jsoneq(mess_str, &t[i], "text") == 0)
         {
             message->text = calloc (t[i + 1].end - t[i + 1].start, sizeof(char));
             strncpy(message->text, mess_str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
-            printf("- Text: %s\n", message->text);
+            printf("  - Text: %s\n", message->text);
             i++;
         }else if (jsoneq(mess_str, &t[i], "audio") == 0)
         {
-            printf("* Audio: \n");
+            printf("  * Audio: \n");
             message->audio = malloc(sizeof(tgbl_audio_t));
             i = i + parse_audio(message->audio, mess_str, &t[i + 1]);
+        }else if (jsoneq(mess_str, &t[i], "from") == 0)
+        {
+            printf("  * From: \n");
+            message->from = malloc(sizeof(tgbl_user_t));
+            i = i + parse_user(message->from, mess_str, &t[i + 1]);
+        }else if (jsoneq(mess_str, &t[i], "chat") == 0)
+        {
+            printf("  * Chat: \n");
+            message->sender_chat = malloc(sizeof(tgbl_chat_t));
+            i = i + parse_chat(message->sender_chat, mess_str, &t[i + 1]);
         }
     }
 
