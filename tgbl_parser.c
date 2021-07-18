@@ -191,10 +191,44 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
     return r;
 }
 
-// TODO:
-static void parse_file(tgbl_file_t *file, char *json, jsmntok_t *t)
+static void parse_getFile(tgbl_file_t *file, char *json)
 {
-    
+    int i;
+    int r;
+    jsmntok_t *t;
+
+    r = parse(json, strlen(json), &t);
+
+    /* Assume the top-level element is an object */
+    if (r < 1 || t[0].type != JSMN_OBJECT) {
+    printf("Object expected\n");
+    return 1;
+    }
+
+    for (i = 0; i < r; i++)
+    {
+        if (jsoneq(json, &t[i], "file_path") == 0)
+        {
+            strncpy(file->file_path, json + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("- File path: %s\n", file->file_path);
+            i++;
+        } else if (jsoneq(json, &t[i], "file_id") == 0)
+        {
+            strncpy(file->file_id, json + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("- File ID: %s\n", file->file_id);
+            i++;
+        } else if (jsoneq(json, &t[i], "file_size") == 0)
+        {
+            char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
+            strncpy(id_str, json + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            file->file_size = atoi(id_str);
+            free (id_str);
+            printf("- Size: %d\n", file->file_size);
+            i++;
+        }
+    }
+
+    return 0;
 }
 
 static int get_result(char *json, char **result, size_t *res_str_len)
@@ -214,11 +248,8 @@ static int get_result(char *json, char **result, size_t *res_str_len)
 
     for (i = 1; i < r; i++) {
         if (jsoneq(json, &t[i], "result") == 0) {
-            /* We may use strndup() to fetch string value */
             printf("* Result: \n  Size: %d\n", t[i+1].type, t[i+1].size);
             
-            //*result = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
-            //strncpy(*result, json+t[i + 1].start, t[i + 1].end - t[i + 1].start);
             *result = json+t[i + 1].start;
             *res_str_len = t[i + 1].end - t[i + 1].start;
             return 0;
@@ -232,7 +263,7 @@ int parse_getMe (tgb_t *bot, char *json)
 {
     int i;
     int r;
-    jsmntok_t *t; /* We expect no more than 128 tokens */
+    jsmntok_t *t;
 
     r = parse(json, strlen(json), &t);
 
@@ -270,7 +301,6 @@ int parse_getUpdates (tgb_t *bot, char *json)
     jsmntok_t *result;
 
     int e = get_result(json, &result_str, &res_str_len);
-    //free (json);
     json = result_str;
     if (e != 0) { return 1; }
     int r = parse(json, res_str_len, &result);

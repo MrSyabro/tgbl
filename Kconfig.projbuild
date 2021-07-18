@@ -1,0 +1,9 @@
+menu "TGBT Configuration"
+
+config TGBT
+    string "Telegram Bot token"
+	default "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+	help
+		Token для доступа к API Bot Telegram.
+
+endmenu
