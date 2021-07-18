@@ -106,6 +106,11 @@ static int parse_user (tgbl_user_t *user, char *json, jsmntok_t *et)
             strncpy(user->first_name, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
             printf("    - First name: %s\n", user->first_name);
             i++;
+        }else if (jsoneq(str, &t[i], "last_name") == 0)
+        {
+            strncpy(user->last_name, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
+            printf("    - Last name: %s\n", user->last_name);
+            i++;
         }
     }
 
