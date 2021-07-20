@@ -56,7 +56,7 @@ static int parse_audio(tgbl_audio_t *audio, char *json, jsmntok_t *et)
     for (int i = 1; i < r; i++)
     {
         jsmntok_t *ct = &t[i];
-        char *debug = str + ct->start;
+        //char *debug = str + ct->start;
         if (jsoneq(str, &t[i], "file_id") == 0)
         {
             strncpy(audio->file_id, str + t[i + 1].start, t[i + 1].end - t[i + 1].start);
@@ -87,7 +87,7 @@ static int parse_user (tgbl_user_t *user, char *json, jsmntok_t *et)
     for (int i = 1; i < r; i++)
     {
         jsmntok_t *ct = &t[i];
-        char *debug = str + ct->start;
+        //char *debug = str + ct->start;
         if (jsoneq(str, &t[i], "id") == 0)
         {
             char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
@@ -126,7 +126,7 @@ static int parse_chat (tgbl_chat_t *chat, char *json, jsmntok_t *et)
     for (int i = 1; i < r; i++)
     {
         jsmntok_t *ct = &t[i];
-        char *debug = str + ct->start;
+        //char *debug = str + ct->start;
         if (jsoneq(str, &t[i], "id") == 0)
         {
             char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
@@ -155,7 +155,7 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
     for (int i = 1; i < r; i++)
     {
         jsmntok_t *ct = &t[i];
-        char *debug = mess_str + ct->start;
+        //char *debug = mess_str + ct->start;
         if (jsoneq(mess_str, &t[i], "message_id") == 0)
         {
             char *id_str = calloc(t[i + 1].end - t[i + 1].start, sizeof(char));
@@ -191,7 +191,7 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
     return r;
 }
 
-static void parse_getFile(tgbl_file_t *file, char *json)
+int parse_getFile(tgbl_file_t *file, char *json)
 {
     int i;
     int r;
@@ -248,7 +248,7 @@ static int get_result(char *json, char **result, size_t *res_str_len)
 
     for (i = 1; i < r; i++) {
         if (jsoneq(json, &t[i], "result") == 0) {
-            printf("* Result: \n  Size: %d\n", t[i+1].type, t[i+1].size);
+            printf("* Result: \n  Size: %d\n", t[i+1].size);
             
             *result = json+t[i + 1].start;
             *res_str_len = t[i + 1].end - t[i + 1].start;
@@ -280,7 +280,7 @@ int parse_getMe (tgb_t *bot, char *json)
             printf("- ID: %.*s\n", t[i + 1].end - t[i + 1].start,
                     json + t[i + 1].start);
             size_t l = t[i + 1].end - t[i + 1].start;
-            char *id_s = calloc(10, sizeof(char));
+            char *id_s = calloc(l, sizeof(char));
             strncpy(id_s, json + t[i + 1].start, l);
 
             bot->id = atoi(id_s);

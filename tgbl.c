@@ -1,19 +1,25 @@
 #include "tgbl.h"
+#include "tgbl_parser.h"
+#include "tgbl_request.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
 
 static const char *TAG = "TGBL_MAIN";
 static tgb_t *current_bot;
 
-int tgbl_init(tgb_t *bot, char *tgbt)
+tgb_t *tgbl_init()
 {
-    bot = malloc(sizeof(tgb_t));
-    if (!bot) { return TGBS_MALLOC_ERR; }
+    tgb_t *bot = malloc(sizeof(tgb_t));
+    if (!bot) { return bot; }
 
-    bot->token = tgbt;
+    bot->token = calloc(strlen(CONFIG_TGBT), sizeof(char));
+    strcpy(bot->token, CONFIG_TGBT);
     
-    int e = tgbl_getMe(bot);
-    if (e != 0) { return TGBS_INIT_ERR; }
-    
-    return 0;
+    tgbl_getMe(bot);
+
+    return bot;
 }
 
 int tgbl_getMe (tgb_t *bot)
@@ -23,10 +29,10 @@ int tgbl_getMe (tgb_t *bot)
     char *response;
     response = calloc(4096, sizeof(char));
 
-    int e = tgbl_request (response, "getUpdates");
+    int e = tgbl_request(response, bot->token, "getMe");
     if (e != TGBS_OK) { free(response); return TGBS_REQUEST_ERR; }
 
-    e = parse_updates(bot, response);
+    e = parse_getMe(bot, response);
     if (e != TGBS_OK) { free(response); return TGBS_PARSE_ERR; }
 
     free(response);
@@ -41,8 +47,8 @@ int tgbl_getUpdates(tgb_t *bot)
     char *response;
     response = calloc(4096, sizeof(char));
 
-    tgbl_request (response, "getUpdates");
-    parse_updates(bot, response);
+    tgbl_request (response, bot->token, "getUpdates");
+    parse_getUpdates(bot, response);
 
     free(response);
 

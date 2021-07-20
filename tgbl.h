@@ -16,7 +16,8 @@ typedef enum tgbl_status_e {
     TGBS_NOINIT_ERR,
 } tgbl_status_t;
 
-void tgbl_start();
+tgb_t *tgbl_init();
+void tgbl_start_updates(tgb_t *bot);
 int tgbl_getMe(tgb_t *bot);
 int tgbl_getUpdates(tgb_t *bot);
 
