@@ -14,8 +14,8 @@ tgb_t *tgbl_init()
     tgb_t *bot = malloc(sizeof(tgb_t));
     if (!bot) { return bot; }
 
-    bot->token = calloc(strlen(CONFIG_TGBT), sizeof(char));
-    strcpy(bot->token, CONFIG_TGBT);
+    bot->token = CONFIG_TGBT;
+    bot->messages = malloc(sizeof(tgbl_message_t));
     
     tgbl_getMe(bot);
 

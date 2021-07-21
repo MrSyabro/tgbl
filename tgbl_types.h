@@ -2,28 +2,28 @@
 #define TGBL_TYPES_H
 
 typedef struct {
-    char file_id[128];
-    char title[16];
-    char mime_type[16];
+    char *file_id;
+    char *title;
+    char *mime_type;
 } tgbl_audio_t;
 
 typedef struct {
     int id;
-    char type[8];
+    char *type;
 } tgbl_chat_t;
 
 typedef struct {
     int id;
     char is_bot;
-    char username[16];
-    char last_name[16];
-    char first_name[16];
+    char *username;
+    char *last_name;
+    char *first_name;
 } tgbl_user_t;
 
 typedef struct {
     int id;
-    tgbl_user_t *from;
-    tgbl_chat_t *sender_chat;
+    tgbl_user_t from;
+    tgbl_chat_t sender_chat;
     tgbl_audio_t *audio;
     char *text;
     int date;
@@ -37,9 +37,9 @@ typedef struct {
 } tgb_t;
 
 typedef struct {
-    char file_id[128];
+    char *file_id;
     int file_size;
-    char file_path[128];
+    char *file_path;
 } tgbl_file_t;
 
 #endif
