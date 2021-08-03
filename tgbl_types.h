@@ -33,6 +33,7 @@ typedef struct {
     char *token;
     int id;
     int messages_len;
+    int last_update_id;
     tgbl_message_t *messages;
 } tgb_t;
 

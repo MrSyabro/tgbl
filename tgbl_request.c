@@ -37,6 +37,7 @@ static esp_err_t _http_event_handle(esp_http_client_event_t *evt)
             ESP_LOGI(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
             if (!esp_http_client_is_chunked_response(evt->client)) {
                 if (evt->user_data) {
+                    ESP_LOGI(TAG, "Get contente length: %d\n", esp_http_client_get_content_length(evt->client));
                     memcpy(evt->user_data + output_len, evt->data, evt->data_len);
                 } else {
                     if (output_buffer == NULL) {
@@ -73,7 +74,7 @@ static esp_err_t _http_event_handle(esp_http_client_event_t *evt)
 
 int tgbl_request(char* response, char* tgbt, char* tgba)
 {
-    char *uri = calloc(128, sizeof(char));
+    char *uri = calloc(34 + strlen(tgba) + strlen(tgbt) + 1, sizeof(char));
     char *response_buff = response;
 
     sprintf(uri, "https://api.telegram.org/bot%s/%s", tgbt, tgba);

@@ -171,7 +171,7 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
             free (id_str);
             printf("  - ID: %d\n", message->id);
             i++;
-        }else if (jsoneq(mess_str, &t[i], "text") == 0)
+        } else if (jsoneq(mess_str, &t[i], "text") == 0)
         {
             size_t l = t[i + 1].end - t[i + 1].start;
             message->text = calloc (l + 1, sizeof(char));
@@ -181,8 +181,8 @@ static int parse_message (tgbl_message_t *message, char *json, jsmntok_t *et)
         }else if (jsoneq(mess_str, &t[i], "audio") == 0)
         {
             printf("  * Audio: \n");
-            //message->audio = malloc(sizeof(tgbl_audio_t));
-            i = i + parse_audio(&message->audio, mess_str, &t[i + 1]);
+            message->audio = malloc(sizeof(tgbl_audio_t));
+            i = i + parse_audio(message->audio, mess_str, &t[i + 1]);
         }else if (jsoneq(mess_str, &t[i], "from") == 0)
         {
             printf("  * From: \n");
@@ -320,17 +320,25 @@ int parse_getUpdates (tgb_t *bot, char *json)
     if (e != 0) { return 1; }
     int r = parse(json, res_str_len, &result);
 
+    bot->messages_len = result[0].size;
+
     if (result[0].size == 0) { return 0; }
 
-    bot->messages_len = result[0].size;
     if (bot->messages)
         free(bot->messages);
     bot->messages = calloc(result[0].size, sizeof(tgbl_message_t));
 
     for (i = 1; i < r; i++) // Обходим updates массив
     {
-        jsmntok_t *t = &result[i]; // temp
-        if (jsoneq(json, &result[i], "message") == 0)
+        if (jsoneq(json, &result[i], "update_id") == 0)
+        {
+            char *id_str = calloc(result[i + 1].end - result[i + 1].start, sizeof(char));
+            strncpy(id_str, json + result[i + 1].start, result[i + 1].end - result[i + 1].start);
+            bot->last_update_id = atoi(id_str);
+            free (id_str);
+            printf("  - Last update ID: %d\n", bot->last_update_id);
+            i++;
+        } else if (jsoneq(json, &result[i], "message") == 0)
         {
             printf("* Message:\n");
             i = i + parse_message(&bot->messages[m], json, &result[i + 1]);
